@@ -1,0 +1,261 @@
+.booking-form-container {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.booking-form-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    background: var(--color-bg-elevated);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.booking-form-header h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.close-button {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    color: var(--color-text-secondary);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.close-button:hover {
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+}
+
+/* Steps indicator */
+.booking-steps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    background: var(--color-bg-secondary);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.step {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
+}
+
+.step.active {
+    opacity: 1;
+}
+
+.step-number {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg-elevated);
+    border: 2px solid var(--color-border);
+    border-radius: 50%;
+    font-size: 0.8125rem;
+    font-weight: 600;
+}
+
+.step.active .step-number {
+    background: var(--color-accent-primary);
+    border-color: var(--color-accent-primary);
+    color: var(--color-bg-primary);
+}
+
+.step.completed .step-number {
+    background: var(--color-accent-primary);
+    border-color: var(--color-accent-primary);
+    color: var(--color-bg-primary);
+}
+
+.step.completed .step-number::after {
+    content: '✓';
+}
+
+.step-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+}
+
+.step.active .step-label {
+    color: var(--color-text-primary);
+}
+
+.step-connector {
+    width: 48px;
+    height: 2px;
+    background: var(--color-border);
+    margin: 0 0.75rem;
+}
+
+/* Form step content */
+.form-step {
+    padding: 1.5rem;
+}
+
+.form-step h3 {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    margin-bottom: 1.25rem;
+    color: var(--color-text-primary);
+}
+
+/* Services grid */
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+}
+
+/* Booking summary */
+.booking-summary {
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.summary-item:first-child {
+    padding-top: 0;
+}
+
+.summary-label {
+    color: var(--color-text-secondary);
+    font-size: 0.9375rem;
+}
+
+.summary-value {
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+/* Express option */
+.express-option {
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+    display: none;
+}
+
+.checkbox-custom {
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--color-border);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.checkbox-label input:checked + .checkbox-custom {
+    background: var(--color-accent-primary);
+    border-color: var(--color-accent-primary);
+}
+
+.checkbox-label input:checked + .checkbox-custom::after {
+    content: '✓';
+    color: var(--color-bg-primary);
+    font-size: 0.875rem;
+    font-weight: 700;
+}
+
+.checkbox-label span:last-child {
+    display: flex;
+    flex-direction: column;
+}
+
+.checkbox-label strong {
+    color: var(--color-text-primary);
+}
+
+.checkbox-label small {
+    color: var(--color-text-secondary);
+    font-size: 0.8125rem;
+}
+
+/* Notes textarea */
+.booking-summary .form-group {
+    padding-top: 1rem;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 1rem;
+}
+
+.booking-summary textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* Total */
+.summary-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+.total-price {
+    font-size: 1.5rem;
+    font-family: var(--font-mono);
+    color: var(--color-accent-primary);
+}
+
+/* Form actions */
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: var(--color-bg-secondary);
+    border-top: 1px solid var(--color-border);
+}
+
+.form-actions .btn {
+    flex: 1;
+    max-width: 200px;
+}
+
+.form-actions .btn-primary {
+    margin-left: auto;
+}
+
+

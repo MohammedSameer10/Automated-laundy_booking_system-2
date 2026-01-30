@@ -1,0 +1,132 @@
+.time-slot-picker {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+}
+
+.time-slot-picker.loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    gap: 1rem;
+    color: var(--color-text-secondary);
+}
+
+.picker-section {
+    margin-bottom: 1.5rem;
+}
+
+.picker-section:last-child {
+    margin-bottom: 0;
+}
+
+.picker-section h4 {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: 1rem;
+}
+
+/* Date grid */
+.date-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 0.75rem;
+}
+
+.date-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.875rem 0.75rem;
+    background: var(--color-bg-elevated);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.date-button:hover {
+    border-color: var(--color-accent-primary);
+    background: var(--color-bg-secondary);
+}
+
+.date-button.selected {
+    border-color: var(--color-accent-primary);
+    background: rgba(6, 214, 160, 0.1);
+}
+
+.date-label {
+    font-weight: 600;
+    color: var(--color-text-primary);
+    font-size: 0.9375rem;
+}
+
+.date-full {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+}
+
+.date-button.selected .date-label {
+    color: var(--color-accent-primary);
+}
+
+/* Time grid */
+.time-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 0.625rem;
+}
+
+.time-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.125rem;
+    padding: 0.75rem 0.5rem;
+    background: var(--color-bg-elevated);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.time-button:hover {
+    border-color: var(--color-accent-secondary);
+    background: var(--color-bg-secondary);
+}
+
+.time-button.selected {
+    border-color: var(--color-accent-secondary);
+    background: rgba(17, 138, 178, 0.1);
+}
+
+.time-label {
+    font-weight: 600;
+    color: var(--color-text-primary);
+    font-size: 0.9375rem;
+}
+
+.time-button.selected .time-label {
+    color: var(--color-accent-secondary);
+}
+
+.slots-left {
+    font-size: 0.6875rem;
+    color: var(--color-text-muted);
+}
+
+.no-slots {
+    text-align: center;
+    color: var(--color-text-secondary);
+    padding: 2rem;
+    background: var(--color-bg-elevated);
+    border-radius: var(--radius-sm);
+}
+
+
