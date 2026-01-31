@@ -96,3 +96,4 @@ router.get('/slots/range', (req, res) => {
 export default router;
 
 
+

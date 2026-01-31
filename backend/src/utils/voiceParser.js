@@ -319,3 +319,4 @@ function calculateConfidence(result) {
 export default { parseVoiceCommand };
 
 
+

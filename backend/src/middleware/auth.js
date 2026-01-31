@@ -30,3 +30,4 @@ export function generateToken(user) {
 export { JWT_SECRET };
 
 
+
