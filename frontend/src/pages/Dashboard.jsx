@@ -7,7 +7,7 @@ import api from '../services/api';
 import './Dashboard.css';
 
 function Dashboard() {
-    const { user, logout } = useAuth();
+    const { user, logout, isAdmin } = useAuth();
     const navigate = useNavigate();
     const [activeBookings, setActiveBookings] = useState([]);
     const [recentBooking, setRecentBooking] = useState(null);
@@ -70,11 +70,12 @@ function Dashboard() {
                 <div className="container navbar-content">
                     <Link to="/" className="logo">
                         <div className="logo-icon">🧺</div>
-                        <span>LaundryVoice</span>
+                        <span>Laundry Voice Booking System</span>
                     </Link>
                     <div className="nav-links">
                         <Link to="/dashboard" className="nav-link active">Dashboard</Link>
                         <Link to="/bookings" className="nav-link">My Bookings</Link>
+                        {isAdmin && <Link to="/admin" className="nav-link admin-link">Admin Panel</Link>}
                         <div className="user-menu">
                             <div className="user-greeting">
                                 <div className="user-avatar">{user?.name?.charAt(0).toUpperCase()}</div>

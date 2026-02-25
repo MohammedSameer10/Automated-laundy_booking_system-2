@@ -30,12 +30,12 @@ router.post('/register', async (req, res) => {
         );
         const result = stmt.run(email, passwordHash, name, phone || null, address || null);
 
-        const user = { id: result.lastInsertRowid, email, name };
+        const user = { id: result.lastInsertRowid, email, name, role: 'user' };
         const token = generateToken(user);
 
         res.status(201).json({
             message: 'User registered successfully',
-            user: { id: user.id, email, name, phone, address },
+            user: { id: user.id, email, name, phone, address, role: 'user' },
             token
         });
     } catch (err) {
@@ -74,7 +74,8 @@ router.post('/login', async (req, res) => {
                 email: user.email,
                 name: user.name,
                 phone: user.phone,
-                address: user.address
+                address: user.address,
+                role: user.role || 'user'
             },
             token
         });
@@ -88,7 +89,7 @@ router.post('/login', async (req, res) => {
 router.get('/me', authenticateToken, (req, res) => {
     try {
         const user = db.prepare(
-            'SELECT id, email, name, phone, address, created_at FROM users WHERE id = ?'
+            'SELECT id, email, name, phone, address, role, created_at FROM users WHERE id = ?'
         ).get(req.user.id);
 
         if (!user) {
@@ -113,7 +114,7 @@ router.put('/me', authenticateToken, (req, res) => {
         stmt.run(name, phone, address, req.user.id);
 
         const user = db.prepare(
-            'SELECT id, email, name, phone, address, created_at FROM users WHERE id = ?'
+            'SELECT id, email, name, phone, address, role, created_at FROM users WHERE id = ?'
         ).get(req.user.id);
 
         res.json({ message: 'Profile updated', user });

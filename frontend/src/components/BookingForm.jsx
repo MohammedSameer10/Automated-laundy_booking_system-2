@@ -14,6 +14,8 @@ function BookingForm({ onBookingCreated, onClose }) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [step, setStep] = useState(1);
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [bookingSuccess, setBookingSuccess] = useState(null);
 
     useEffect(() => {
         loadServices();
@@ -22,7 +24,6 @@ function BookingForm({ onBookingCreated, onClose }) {
     async function loadServices() {
         try {
             const { services: fetchedServices } = await api.getServices();
-            // Filter out addon services for display
             setServices(fetchedServices.filter(s => s.category !== 'addon'));
         } catch (err) {
             setError('Failed to load services');
@@ -32,20 +33,20 @@ function BookingForm({ onBookingCreated, onClose }) {
     function calculateTotal() {
         if (!selectedService) return 0;
         let total = selectedService.price;
-        if (expressDelivery) {
-            total += 10; // Express addon price
-        }
+        if (expressDelivery) total += 10;
         return total;
     }
 
-    async function handleSubmit(e) {
+    function handleConfirmClick(e) {
         e.preventDefault();
-        
         if (!selectedService || !selectedDate || !selectedTime) {
             setError('Please complete all required fields');
             return;
         }
+        setShowConfirmModal(true);
+    }
 
+    async function handlePlaceBooking() {
         setLoading(true);
         setError(null);
 
@@ -58,28 +59,65 @@ function BookingForm({ onBookingCreated, onClose }) {
                 notes
             });
 
+            setShowConfirmModal(false);
+            setBookingSuccess(booking);
+
             if (onBookingCreated) {
                 onBookingCreated(booking);
             }
         } catch (err) {
+            setShowConfirmModal(false);
             setError(err.message || 'Failed to create booking');
         } finally {
             setLoading(false);
         }
     }
 
+    function resetForm() {
+        setSelectedService(null);
+        setSelectedDate(null);
+        setSelectedTime(null);
+        setExpressDelivery(false);
+        setNotes('');
+        setStep(1);
+        setBookingSuccess(null);
+        setError(null);
+    }
+
     function nextStep() {
-        if (step === 1 && selectedService) {
-            setStep(2);
-        } else if (step === 2 && selectedDate && selectedTime) {
-            setStep(3);
-        }
+        if (step === 1 && selectedService) setStep(2);
+        else if (step === 2 && selectedDate && selectedTime) setStep(3);
     }
 
     function prevStep() {
-        if (step > 1) {
-            setStep(step - 1);
-        }
+        if (step > 1) setStep(step - 1);
+    }
+
+    function formatTime(timeStr) {
+        const [hours] = timeStr.split(':');
+        const h = parseInt(hours);
+        const ampm = h >= 12 ? 'PM' : 'AM';
+        const hour12 = h % 12 || 12;
+        return `${hour12}:00 ${ampm}`;
+    }
+
+    if (bookingSuccess) {
+        return (
+            <div className="booking-form-container">
+                <div className="booking-success-state">
+                    <div className="success-icon">✅</div>
+                    <h2>Booking Placed!</h2>
+                    <p>Your {bookingSuccess.service_name} has been scheduled.</p>
+                    <div className="success-details">
+                        <div><strong>Date:</strong> {bookingSuccess.pickup_date}</div>
+                        <div><strong>Time:</strong> {formatTime(bookingSuccess.pickup_time)}</div>
+                        <div><strong>Total:</strong> ${bookingSuccess.total_price.toFixed(2)}</div>
+                        <div><strong>Status:</strong> <span className="status-badge status-pending">Pending</span></div>
+                    </div>
+                    <button className="btn btn-primary" onClick={resetForm}>Book Another Service</button>
+                </div>
+            </div>
+        );
     }
 
     return (
@@ -108,12 +146,9 @@ function BookingForm({ onBookingCreated, onClose }) {
                 </div>
             </div>
 
-            {error && (
-                <div className="alert alert-error">{error}</div>
-            )}
+            {error && <div className="alert alert-error">{error}</div>}
 
-            <form onSubmit={handleSubmit}>
-                {/* Step 1: Select Service */}
+            <form onSubmit={handleConfirmClick}>
                 {step === 1 && (
                     <div className="form-step">
                         <h3>Choose a Service</h3>
@@ -130,7 +165,6 @@ function BookingForm({ onBookingCreated, onClose }) {
                     </div>
                 )}
 
-                {/* Step 2: Select Date & Time */}
                 {step === 2 && (
                     <div className="form-step">
                         <h3>Schedule Pickup</h3>
@@ -143,11 +177,9 @@ function BookingForm({ onBookingCreated, onClose }) {
                     </div>
                 )}
 
-                {/* Step 3: Confirm */}
                 {step === 3 && (
                     <div className="form-step">
                         <h3>Review & Confirm</h3>
-                        
                         <div className="booking-summary">
                             <div className="summary-item">
                                 <span className="summary-label">Service</span>
@@ -161,7 +193,6 @@ function BookingForm({ onBookingCreated, onClose }) {
                                 <span className="summary-label">Pickup Time</span>
                                 <span className="summary-value">{selectedTime}</span>
                             </div>
-                            
                             <div className="express-option">
                                 <label className="checkbox-label">
                                     <input
@@ -176,7 +207,6 @@ function BookingForm({ onBookingCreated, onClose }) {
                                     </span>
                                 </label>
                             </div>
-
                             <div className="form-group">
                                 <label className="form-label">Special Instructions (optional)</label>
                                 <textarea
@@ -186,7 +216,6 @@ function BookingForm({ onBookingCreated, onClose }) {
                                     rows={3}
                                 />
                             </div>
-
                             <div className="summary-total">
                                 <span>Total</span>
                                 <span className="total-price">${calculateTotal().toFixed(2)}</span>
@@ -202,8 +231,8 @@ function BookingForm({ onBookingCreated, onClose }) {
                         </button>
                     )}
                     {step < 3 ? (
-                        <button 
-                            type="button" 
+                        <button
+                            type="button"
                             className="btn btn-primary"
                             onClick={nextStep}
                             disabled={
@@ -214,21 +243,45 @@ function BookingForm({ onBookingCreated, onClose }) {
                             Continue →
                         </button>
                     ) : (
-                        <button 
-                            type="submit" 
-                            className="btn btn-primary"
-                            disabled={loading}
-                        >
-                            {loading ? 'Booking...' : 'Confirm Booking ✓'}
+                        <button type="submit" className="btn btn-primary" disabled={loading}>
+                            Confirm Booking ✓
                         </button>
                     )}
                 </div>
             </form>
+
+            {showConfirmModal && (
+                <div className="confirm-modal-overlay" onClick={() => !loading && setShowConfirmModal(false)}>
+                    <div className="confirm-modal" onClick={e => e.stopPropagation()}>
+                        <h3>Confirm Your Booking</h3>
+                        <div className="confirm-summary">
+                            <p><strong>{selectedService?.name}</strong></p>
+                            <p>{selectedDate} at {selectedTime && formatTime(selectedTime)}</p>
+                            {expressDelivery && <p>Express Delivery</p>}
+                            <p className="confirm-total">Total: ${calculateTotal().toFixed(2)}</p>
+                        </div>
+                        <p className="confirm-question">Are you sure you want to place this booking?</p>
+                        <div className="confirm-actions">
+                            <button
+                                className="btn btn-secondary"
+                                onClick={() => setShowConfirmModal(false)}
+                                disabled={loading}
+                            >
+                                Go Back
+                            </button>
+                            <button
+                                className="btn btn-primary"
+                                onClick={handlePlaceBooking}
+                                disabled={loading}
+                            >
+                                {loading ? 'Placing...' : 'Place Booking'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
 
 export default BookingForm;
-
-
-

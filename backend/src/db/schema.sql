@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS users (
     name TEXT NOT NULL,
     phone TEXT,
     address TEXT,
+    role TEXT DEFAULT 'user' CHECK (role IN ('user', 'admin')),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -67,6 +68,3 @@ FROM
      UNION SELECT '11:00' UNION SELECT '12:00' UNION SELECT '13:00' 
      UNION SELECT '14:00' UNION SELECT '15:00' UNION SELECT '16:00' 
      UNION SELECT '17:00' UNION SELECT '18:00');
-
-
-

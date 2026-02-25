@@ -7,9 +7,7 @@ export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        checkAuth();
-    }, []);
+    useEffect(() => { checkAuth(); }, []);
 
     async function checkAuth() {
         const token = localStorage.getItem('token');
@@ -55,7 +53,8 @@ export function AuthProvider({ children }) {
         register,
         logout,
         updateProfile,
-        isAuthenticated: !!user
+        isAuthenticated: !!user,
+        isAdmin: user?.role === 'admin'
     };
 
     return (
@@ -74,6 +73,3 @@ export function useAuth() {
 }
 
 export default AuthContext;
-
-
-

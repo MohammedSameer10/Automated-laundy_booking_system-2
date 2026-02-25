@@ -11,7 +11,7 @@ function Home() {
                 <div className="container navbar-content">
                     <Link to="/" className="logo">
                         <div className="logo-icon">🧺</div>
-                        <span>LaundryVoice</span>
+                        <span>Laundry Voice Booking System</span>
                     </Link>
                     <div className="nav-links">
                         {isAuthenticated ? (

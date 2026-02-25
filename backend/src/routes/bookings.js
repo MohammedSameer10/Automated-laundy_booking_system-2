@@ -232,11 +232,11 @@ router.post('/voice', (req, res) => {
     }
 });
 
-// Get user's bookings
+// Get user's bookings (with search / filter / sort)
 router.get('/', (req, res) => {
     try {
         const userId = req.user.id;
-        const { status } = req.query;
+        const { status, search, startDate, endDate, deliveryType, sortBy, sortOrder } = req.query;
 
         let query = `
             SELECT b.*, s.name as service_name, s.category as service_category, s.description as service_description
@@ -246,12 +246,32 @@ router.get('/', (req, res) => {
         `;
         const params = [userId];
 
-        if (status) {
+        if (status && status !== 'all') {
             query += ' AND b.status = ?';
             params.push(status);
         }
+        if (search) {
+            query += ' AND (s.name LIKE ? OR b.notes LIKE ?)';
+            const term = `%${search}%`;
+            params.push(term, term);
+        }
+        if (startDate) {
+            query += ' AND b.pickup_date >= ?';
+            params.push(startDate);
+        }
+        if (endDate) {
+            query += ' AND b.pickup_date <= ?';
+            params.push(endDate);
+        }
+        if (deliveryType) {
+            query += ' AND b.delivery_type = ?';
+            params.push(deliveryType);
+        }
 
-        query += ' ORDER BY b.created_at DESC';
+        const allowedSort = ['created_at', 'pickup_date', 'total_price'];
+        const col = allowedSort.includes(sortBy) ? `b.${sortBy}` : 'b.created_at';
+        const dir = sortOrder === 'asc' ? 'ASC' : 'DESC';
+        query += ` ORDER BY ${col} ${dir}`;
 
         const bookings = db.prepare(query).all(...params);
         res.json({ bookings });

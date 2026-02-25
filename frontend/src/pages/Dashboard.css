@@ -4,6 +4,15 @@
     flex-direction: column;
 }
 
+.admin-link {
+    background: rgba(239, 71, 111, 0.1);
+    color: var(--color-accent-warm) !important;
+    padding: 0.375rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-size: 0.8125rem;
+    font-weight: 600;
+}
+
 .user-menu {
     display: flex;
     align-items: center;

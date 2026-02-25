@@ -5,21 +5,36 @@ import api from '../services/api';
 import './BookingHistory.css';
 
 function BookingHistory() {
-    const { user, logout } = useAuth();
+    const { user, logout, isAdmin } = useAuth();
     const navigate = useNavigate();
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('all');
     const [cancelling, setCancelling] = useState(null);
 
-    useEffect(() => {
-        loadBookings();
-    }, []);
+    const [search, setSearch] = useState('');
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const [deliveryType, setDeliveryType] = useState('');
+    const [sortBy, setSortBy] = useState('created_at');
+    const [sortOrder, setSortOrder] = useState('desc');
+
+    useEffect(() => { loadBookings(); }, []);
 
     async function loadBookings() {
+        setLoading(true);
         try {
-            const { bookings: fetchedBookings } = await api.getBookings();
-            setBookings(fetchedBookings);
+            const params = {};
+            if (filter !== 'all') params.status = filter;
+            if (search) params.search = search;
+            if (startDate) params.startDate = startDate;
+            if (endDate) params.endDate = endDate;
+            if (deliveryType) params.deliveryType = deliveryType;
+            params.sortBy = sortBy;
+            params.sortOrder = sortOrder;
+
+            const { bookings: fetched } = await api.getBookings(params);
+            setBookings(fetched);
         } catch (err) {
             console.error('Failed to load bookings:', err);
         } finally {
@@ -27,9 +42,13 @@ function BookingHistory() {
         }
     }
 
+    function handleApplyFilters(e) {
+        e?.preventDefault();
+        loadBookings();
+    }
+
     async function handleCancel(bookingId) {
         if (!confirm('Are you sure you want to cancel this booking?')) return;
-        
         setCancelling(bookingId);
         try {
             await api.cancelBooking(bookingId);
@@ -48,35 +67,22 @@ function BookingHistory() {
 
     function formatDate(dateStr) {
         const date = new Date(dateStr + 'T00:00:00');
-        return date.toLocaleDateString('en-US', { 
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long', 
-            day: 'numeric' 
+        return date.toLocaleDateString('en-US', {
+            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
         });
     }
 
     function formatTime(timeStr) {
         const [hours] = timeStr.split(':');
         const h = parseInt(hours);
-        const ampm = h >= 12 ? 'PM' : 'AM';
-        const hour12 = h % 12 || 12;
-        return `${hour12}:00 ${ampm}`;
+        return `${h % 12 || 12}:00 ${h >= 12 ? 'PM' : 'AM'}`;
     }
 
     function formatCreatedAt(dateStr) {
-        const date = new Date(dateStr);
-        return date.toLocaleDateString('en-US', { 
-            month: 'short', 
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
+        return new Date(dateStr).toLocaleDateString('en-US', {
+            month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
         });
     }
-
-    const filteredBookings = filter === 'all' 
-        ? bookings 
-        : bookings.filter(b => b.status === filter);
 
     const statusCounts = {
         all: bookings.length,
@@ -93,19 +99,18 @@ function BookingHistory() {
                 <div className="container navbar-content">
                     <Link to="/" className="logo">
                         <div className="logo-icon">🧺</div>
-                        <span>LaundryVoice</span>
+                        <span>Laundry Voice Booking System</span>
                     </Link>
                     <div className="nav-links">
                         <Link to="/dashboard" className="nav-link">Dashboard</Link>
                         <Link to="/bookings" className="nav-link active">My Bookings</Link>
+                        {isAdmin && <Link to="/admin" className="nav-link admin-link">Admin Panel</Link>}
                         <div className="user-menu">
                             <div className="user-greeting">
                                 <div className="user-avatar">{user?.name?.charAt(0).toUpperCase()}</div>
                                 <span className="user-name">{user?.name}</span>
                             </div>
-                            <button className="btn btn-ghost" onClick={handleLogout}>
-                                Sign Out
-                            </button>
+                            <button className="btn btn-ghost" onClick={handleLogout}>Sign Out</button>
                         </div>
                     </div>
                 </div>
@@ -118,12 +123,41 @@ function BookingHistory() {
                         <p className="page-subtitle">View and manage all your laundry bookings</p>
                     </div>
 
+                    <form className="booking-filters-bar" onSubmit={handleApplyFilters}>
+                        <input
+                            type="text"
+                            className="filter-search"
+                            placeholder="Search by service or notes..."
+                            value={search}
+                            onChange={e => setSearch(e.target.value)}
+                        />
+                        <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
+                        <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
+                        <select value={deliveryType} onChange={e => setDeliveryType(e.target.value)}>
+                            <option value="">All Delivery</option>
+                            <option value="standard">Standard</option>
+                            <option value="express">Express</option>
+                        </select>
+                        <select value={`${sortBy}-${sortOrder}`} onChange={e => {
+                            const [sb, so] = e.target.value.split('-');
+                            setSortBy(sb); setSortOrder(so);
+                        }}>
+                            <option value="created_at-desc">Newest First</option>
+                            <option value="created_at-asc">Oldest First</option>
+                            <option value="total_price-desc">Price: High to Low</option>
+                            <option value="total_price-asc">Price: Low to High</option>
+                            <option value="pickup_date-asc">Pickup: Soonest</option>
+                            <option value="pickup_date-desc">Pickup: Latest</option>
+                        </select>
+                        <button type="submit" className="btn btn-primary filter-apply-btn">Apply</button>
+                    </form>
+
                     <div className="filter-tabs">
                         {['all', 'pending', 'confirmed', 'in_progress', 'completed', 'cancelled'].map(status => (
                             <button
                                 key={status}
                                 className={`filter-tab ${filter === status ? 'active' : ''}`}
-                                onClick={() => setFilter(status)}
+                                onClick={() => { setFilter(status); setTimeout(loadBookings, 0); }}
                             >
                                 <span className="filter-label">
                                     {status === 'all' ? 'All' : status.replace('_', ' ')}
@@ -138,22 +172,16 @@ function BookingHistory() {
                             <div className="loading-spinner"></div>
                             <p>Loading your bookings...</p>
                         </div>
-                    ) : filteredBookings.length === 0 ? (
+                    ) : bookings.length === 0 ? (
                         <div className="empty-state">
                             <div className="empty-state-icon">📭</div>
                             <h3>No bookings found</h3>
-                            <p>
-                                {filter === 'all' 
-                                    ? "You haven't made any bookings yet." 
-                                    : `No ${filter.replace('_', ' ')} bookings.`}
-                            </p>
-                            <Link to="/dashboard" className="btn btn-primary">
-                                Make a Booking
-                            </Link>
+                            <p>{filter === 'all' ? "You haven't made any bookings yet." : `No ${filter.replace('_', ' ')} bookings.`}</p>
+                            <Link to="/dashboard" className="btn btn-primary">Make a Booking</Link>
                         </div>
                     ) : (
                         <div className="bookings-list">
-                            {filteredBookings.map(booking => (
+                            {bookings.map(booking => (
                                 <div key={booking.id} className="booking-card">
                                     <div className="booking-card-header">
                                         <div className="booking-info">
@@ -162,11 +190,8 @@ function BookingHistory() {
                                                 {booking.status.replace('_', ' ')}
                                             </span>
                                         </div>
-                                        <div className="booking-price">
-                                            ${booking.total_price.toFixed(2)}
-                                        </div>
+                                        <div className="booking-price">${booking.total_price.toFixed(2)}</div>
                                     </div>
-
                                     <div className="booking-card-body">
                                         <div className="booking-detail">
                                             <span className="detail-icon">📅</span>
@@ -192,17 +217,13 @@ function BookingHistory() {
                                             </div>
                                         </div>
                                     </div>
-
                                     {booking.notes && (
                                         <div className="booking-notes">
                                             <span className="notes-label">Notes:</span> {booking.notes}
                                         </div>
                                     )}
-
                                     <div className="booking-card-footer">
-                                        <span className="booking-created">
-                                            Booked on {formatCreatedAt(booking.created_at)}
-                                        </span>
+                                        <span className="booking-created">Booked on {formatCreatedAt(booking.created_at)}</span>
                                         {(booking.status === 'pending' || booking.status === 'confirmed') && (
                                             <button
                                                 className="btn btn-ghost cancel-btn"
@@ -224,6 +245,3 @@ function BookingHistory() {
 }
 
 export default BookingHistory;
-
-
-

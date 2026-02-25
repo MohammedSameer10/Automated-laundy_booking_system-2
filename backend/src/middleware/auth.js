@@ -21,13 +21,10 @@ export function authenticateToken(req, res, next) {
 
 export function generateToken(user) {
     return jwt.sign(
-        { id: user.id, email: user.email, name: user.name },
+        { id: user.id, email: user.email, name: user.name, role: user.role || 'user' },
         JWT_SECRET,
         { expiresIn: '7d' }
     );
 }
 
 export { JWT_SECRET };
-
-
-
